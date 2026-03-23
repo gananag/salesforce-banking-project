@@ -8,26 +8,26 @@ This document provides a detailed step-by-step implementation roadmap for enhanc
 ## 📊 PHASE 1: Enhanced Account Management UI
 **Estimated Time: 2-3 hours | Difficulty: Beginner-Intermediate**
 
-### Step 1.1: ✅ COMPLETED - Add Create Account Modal
+### Step 1.1: ✅ COMPLETED - Add Create Account model
 
 **What was done:**
 - Added "Create Account" button to accountList component
-- Implemented modal form with Account Name and Industry fields
+- Implemented model form with Account Name and Industry fields
 - Integrated with existing `createAccount()` Apex method
 - Added form validation and error handling
 - Success notification on account creation
 
 **Files Modified:**
-- `accountList.html` - Added button and modal UI
+- `accountList.html` - Added button and model UI
 - `accountList.js` - Added create account logic
 
 **Key Features:**
-- Modal opens/closes properly
+- model opens/closes properly
 - Form validation (required fields)
 - Calls Apex method with parameters
 - Shows success toast notification
 - Auto-refreshes account list if industry matches
-- Displays error messages in modal
+- Displays error messages in model
 
 **Test it:**
 1. Deploy code: `sf project deploy start`
@@ -45,7 +45,7 @@ This document provides a detailed step-by-step implementation roadmap for enhanc
 
 **What we'll do:**
 - Add "Edit" action to datatable row actions
-- Create modal for editing annual revenue
+- Create model for editing annual revenue
 - Call `updateAnnualRevenue()` Apex method
 - Auto-refresh table after update
 - Show success notification
@@ -53,7 +53,7 @@ This document provides a detailed step-by-step implementation roadmap for enhanc
 **Implementation Details:**
 1. Update `accountList.html`:
    - Add Edit action to datatable row actions
-   - Add revenue update modal
+   - Add revenue update model
 
 2. Update `accountList.js`:
    - Add edit form state (accountId, annualRevenue)
