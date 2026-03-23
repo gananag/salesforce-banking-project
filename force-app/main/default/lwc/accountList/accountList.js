@@ -11,6 +11,10 @@ export default class AccountList extends LightningElement {
     error = undefined;
     isLoading = false;
 
+    // Pagination state
+    currentPage = 1;
+    pageSize = 10;
+
     // Create form state
     createForm = {
         accountName: '',
@@ -320,5 +324,81 @@ export default class AccountList extends LightningElement {
             .finally(() => {
                 this.isUpdating = false;
             });
+    }
+
+    /**
+     * Getter to calculate paginated accounts for current page
+     * @return {Array} Array of accounts for the current page
+     */
+    get paginatedAccounts() {
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = startIndex + this.pageSize;
+        return this.filteredAccounts.slice(startIndex, endIndex);
+    }
+
+    /**
+     * Getter to calculate total number of pages
+     * @return {number} Total pages based on filtered accounts
+     */
+    get totalPages() {
+        return Math.ceil(this.filteredAccounts.length / this.pageSize) || 1;
+    }
+
+    /**
+     * Getter to check if pagination controls should be displayed
+     * @return {boolean} True if more than one page exists
+     */
+    get hasPagination() {
+        return this.totalPages > 1;
+    }
+
+    /**
+     * Getter to calculate the starting index for display
+     * @return {number} 1-based index of first account on current page
+     */
+    get pageStartIndex() {
+        return (this.currentPage - 1) * this.pageSize + 1;
+    }
+
+    /**
+     * Getter to calculate the ending index for display
+     * @return {number} 1-based index of last account on current page
+     */
+    get pageEndIndex() {
+        return Math.min(this.currentPage * this.pageSize, this.filteredAccounts.length);
+    }
+
+    /**
+     * Getter to determine if Previous button should be disabled
+     * @return {boolean} True if on first page
+     */
+    get isPreviousDisabled() {
+        return this.currentPage === 1;
+    }
+
+    /**
+     * Getter to determine if Next button should be disabled
+     * @return {boolean} True if on last page
+     */
+    get isNextDisabled() {
+        return this.currentPage === this.totalPages;
+    }
+
+    /**
+     * Handles previous page button click
+     */
+    handlePreviousPage() {
+        if (this.currentPage > 1) {
+            this.currentPage -= 1;
+        }
+    }
+
+    /**
+     * Handles next page button click
+     */
+    handleNextPage() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage += 1;
+        }
     }
 }
