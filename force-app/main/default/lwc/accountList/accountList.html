@@ -11,6 +11,7 @@
         </div>
 
         <div class="slds-m-around_medium">
+            <!-- Industry Filter -->
             <lightning-combobox
                 name="industry"
                 label="Select Industry"
@@ -20,19 +21,58 @@
                 class="slds-m-bottom_medium">
             </lightning-combobox>
 
+            <!-- Search Filter -->
+            <lightning-input
+                type="search"
+                name="searchTerm"
+                label="Search by Account Name"
+                value={searchTerm}
+                onchange={handleSearchChange}
+                placeholder="Enter account name..."
+                class="slds-m-bottom_medium">
+            </lightning-input>
+
+            <!-- Active Filters Display -->
+            <template if:true={hasActiveFilters}>
+                <div class="slds-m-bottom_medium">
+                    <lightning-badge label={activeFiltersLabel}></lightning-badge>
+                </div>
+            </template>
+
             <template if:true={error}>
                 <lightning-alert variant="error" title="Error loading accounts">
                     {errorMessage}
                 </lightning-alert>
             </template>
 
+            <!-- Results Summary -->
             <template if:false={error}>
+                <template if:true={filteredAccounts.length}>
+                    <div class="slds-m-bottom_medium">
+                        <small>Showing {filteredAccounts.length} account(s)</small>
+                    </div>
+                </template>
+
                 <lightning-datatable
                     key-field="Id"
-                    data={accounts}
+                    data={filteredAccounts}
                     columns={columns}
                     onrowaction={handleRowAction}>
                 </lightning-datatable>
+
+                <!-- No Results Message -->
+                <template if:false={filteredAccounts.length}>
+                    <div class="slds-m-top_medium slds-text-align_center">
+                        <p class="slds-text-color_weak">
+                            <template if:true={selectedIndustry}>
+                                No accounts found for the selected filters.
+                            </template>
+                            <template if:false={selectedIndustry}>
+                                Select an industry to view accounts.
+                            </template>
+                        </p>
+                    </div>
+                </template>
             </template>
         </div>
     </lightning-card>

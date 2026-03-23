@@ -7,6 +7,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class AccountList extends LightningElement {
     selectedIndustry = '';
     accounts = [];
+    searchTerm = '';
     error = undefined;
     isLoading = false;
 
@@ -66,6 +67,58 @@ export default class AccountList extends LightningElement {
      */
     handleIndustryChange(event) {
         this.selectedIndustry = event.detail.value;
+    }
+
+    /**
+     * Handles search input change event
+     * @param {Event} event - Change event from search input
+     */
+    handleSearchChange(event) {
+        this.searchTerm = event.detail.value.trim().toLowerCase();
+    }
+
+    /**
+     * Getter to filter accounts based on selected industry and search term
+     * @return {Array} Filtered array of Account records
+     */
+    get filteredAccounts() {
+        if (!this.accounts || this.accounts.length === 0) {
+            return [];
+        }
+
+        return this.accounts.filter(account => {
+            // Filter by search term (account name)
+            if (this.searchTerm) {
+                const accountName = account.Name ? account.Name.toLowerCase() : '';
+                if (!accountName.includes(this.searchTerm)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    }
+
+    /**
+     * Getter to check if any filters are active
+     * @return {boolean} True if industry or search term is set
+     */
+    get hasActiveFilters() {
+        return this.selectedIndustry || this.searchTerm;
+    }
+
+    /**
+     * Getter to display active filter labels
+     * @return {string} Label describing active filters
+     */
+    get activeFiltersLabel() {
+        const filters = [];
+        if (this.selectedIndustry) {
+            filters.push(`Industry: ${this.selectedIndustry}`);
+        }
+        if (this.searchTerm) {
+            filters.push(`Search: "${this.searchTerm}"`);
+        }
+        return filters.join(' • ');
     }
 
     /**
