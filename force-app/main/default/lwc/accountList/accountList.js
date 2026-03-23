@@ -1,0 +1,271 @@
+import { LightningElement, wire } from 'lwc';
+import getAccountsByIndustry from '@salesforce/apex/AccountManager.getAccountsByIndustry';
+import createAccount from '@salesforce/apex/AccountManager.createAccount';
+import updateAnnualRevenue from '@salesforce/apex/AccountManager.updateAnnualRevenue';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+
+export default class AccountList extends LightningElement {
+    selectedIndustry = '';
+    accounts = [];
+    error = undefined;
+    isLoading = false;
+
+    // Create form state
+    createForm = {
+        accountName: '',
+        industry: ''
+    };
+    createError = '';
+    isCreating = false;
+
+    // Revenue form state
+    revenueForm = {
+        accountId: '',
+        accountName: '',
+        revenue: ''
+    };
+    revenueError = '';
+    isUpdating = false;
+
+    industryOptions = [
+        { label: 'Technology', value: 'Technology' },
+        { label: 'Finance', value: 'Finance' },
+        { label: 'Healthcare', value: 'Healthcare' },
+        { label: 'Manufacturing', value: 'Manufacturing' },
+        { label: 'Retail', value: 'Retail' }
+    ];
+
+    /**
+     * Getter to safely extract error message
+     * @return {string} Error message or default message
+     */
+    get errorMessage() {
+        return this.error?.body?.message || 'An error occurred while loading accounts';
+    }
+
+    /**
+     * Wire method to fetch accounts by selected industry
+     * @param {Object} error - Error object if query fails
+     * @param {Array} data - List of Account records
+     */
+    @wire(getAccountsByIndustry, { industry: '$selectedIndustry' })
+    wiredAccounts({ error, data }) {
+        if (data) {
+            this.accounts = data;
+            this.error = undefined;
+        } else if (error) {
+            this.error = error;
+            this.accounts = [];
+            console.error('Error fetching accounts:', error);
+        }
+    }
+
+    /**
+     * Handles industry dropdown change event
+     * @param {Event} event - Change event from combobox
+     */
+    handleIndustryChange(event) {
+        this.selectedIndustry = event.detail.value;
+    }
+
+    /**
+     * Opens the create account modal
+     */
+    handleOpenCreateModal() {
+        this.createForm = { accountName: '', industry: '' };
+        this.createError = '';
+        this.refs.createModal.show();
+    }
+
+    /**
+     * Closes the create account modal
+     */
+    handleCloseCreateModal() {
+        this.refs.createModal.hide();
+    }
+
+    /**
+     * Handles form input changes in create modal
+     * @param {Event} event - Change event from form input
+     */
+    handleCreateFormChange(event) {
+        const { name, value } = event.target;
+        this.createForm = {
+            ...this.createForm,
+            [name]: value
+        };
+        this.createError = ''; // Clear error on input change
+    }
+
+    /**
+     * Handles create account submission
+     */
+    handleCreateAccount() {
+        // Validate form
+        if (!this.createForm.accountName.trim()) {
+            this.createError = 'Account name is required.';
+            return;
+        }
+        if (!this.createForm.industry) {
+            this.createError = 'Industry is required.';
+            return;
+        }
+
+        this.isCreating = true;
+
+        createAccount({
+            accountName: this.createForm.accountName,
+            industry: this.createForm.industry
+        })
+            .then((result) => {
+                // Close modal
+                this.handleCloseCreateModal();
+                
+                // Show success notification
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: `Account "${result.Name}" created successfully!`,
+                        variant: 'success'
+                    })
+                );
+
+                // Refresh account list if the created industry matches selected industry
+                if (this.selectedIndustry === this.createForm.industry) {
+                    this.selectedIndustry = ''; // Reset
+                    setTimeout(() => {
+                        this.selectedIndustry = this.createForm.industry; // Re-trigger wire
+                    }, 100);
+                }
+
+                // Reset form
+                this.createForm = { accountName: '', industry: '' };
+            })
+            .catch((error) => {
+                console.error('Error creating account:', error);
+                this.createError = error?.body?.message || 'An error occurred while creating the account.';
+            })
+            .finally(() => {
+                this.isCreating = false;
+            });
+    }
+
+    columns = [
+        { label: 'Account Name', fieldName: 'Name', type: 'text' },
+        { label: 'Industry', fieldName: 'Industry', type: 'text' },
+        { label: 'Type', fieldName: 'Type', type: 'text' },
+        {
+            type: 'action',
+            typeAttributes: {
+                rowActions: [
+                    { label: 'View', name: 'view' },
+                    { label: 'Edit', name: 'edit' }
+                ]
+            }
+        }
+    ];
+
+    /**
+     * Handles row action events (View and Edit button clicks)
+     * @param {Event} event - Row action event
+     */
+    handleRowAction(event) {
+        const action = event.detail.action;
+        const row = event.detail.row;
+
+        if (action.name === 'view') {
+            window.open('/' + row.Id, '_blank');
+        } else if (action.name === 'edit') {
+            this.handleOpenRevenueModal(row);
+        }
+    }
+
+    /**
+     * Opens the revenue update modal with selected account data
+     * @param {Object} account - Account record from datatable
+     */
+    handleOpenRevenueModal(account) {
+        this.revenueForm = {
+            accountId: account.Id,
+            accountName: account.Name,
+            revenue: account.AnnualRevenue || ''
+        };
+        this.revenueError = '';
+        this.refs.revenueModal.show();
+    }
+
+    /**
+     * Closes the revenue update modal
+     */
+    handleCloseRevenueModal() {
+        this.refs.revenueModal.hide();
+    }
+
+    /**
+     * Handles form input changes in revenue modal
+     * @param {Event} event - Change event from form input
+     */
+    handleRevenueFormChange(event) {
+        const { name, value } = event.target;
+        this.revenueForm = {
+            ...this.revenueForm,
+            [name]: value
+        };
+        this.revenueError = ''; // Clear error on input change
+    }
+
+    /**
+     * Handles revenue update submission
+     */
+    handleUpdateRevenue() {
+        // Validate form
+        if (!this.revenueForm.revenue) {
+            this.revenueError = 'Revenue is required.';
+            return;
+        }
+
+        const revenueValue = parseFloat(this.revenueForm.revenue);
+        if (isNaN(revenueValue) || revenueValue < 0) {
+            this.revenueError = 'Revenue must be a valid positive number.';
+            return;
+        }
+
+        this.isUpdating = true;
+
+        updateAnnualRevenue({
+            accountId: this.revenueForm.accountId,
+            annualRevenue: revenueValue
+        })
+            .then(() => {
+                // Close modal
+                this.handleCloseRevenueModal();
+                
+                // Show success notification
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Success',
+                        message: `Revenue for "${this.revenueForm.accountName}" updated successfully!`,
+                        variant: 'success'
+                    })
+                );
+
+                // Refresh account list
+                if (this.selectedIndustry) {
+                    this.selectedIndustry = '';
+                    setTimeout(() => {
+                        this.selectedIndustry = this.revenueForm.industry || '';
+                    }, 100);
+                }
+
+                // Reset form
+                this.revenueForm = { accountId: '', accountName: '', revenue: '' };
+            })
+            .catch((error) => {
+                console.error('Error updating revenue:', error);
+                this.revenueError = error?.body?.message || 'An error occurred while updating revenue.';
+            })
+            .finally(() => {
+                this.isUpdating = false;
+            });
+    }
+}
