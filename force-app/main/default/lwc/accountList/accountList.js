@@ -7,8 +7,13 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class AccountList extends LightningElement {
     selectedIndustry = '';
     accounts = [];
+    searchTerm = '';
     error = undefined;
     isLoading = false;
+
+    // Pagination state
+    currentPage = 1;
+    pageSize = 10;
 
     // Create form state
     createForm = {
@@ -66,6 +71,58 @@ export default class AccountList extends LightningElement {
      */
     handleIndustryChange(event) {
         this.selectedIndustry = event.detail.value;
+    }
+
+    /**
+     * Handles search input change event
+     * @param {Event} event - Change event from search input
+     */
+    handleSearchChange(event) {
+        this.searchTerm = event.detail.value.trim().toLowerCase();
+    }
+
+    /**
+     * Getter to filter accounts based on selected industry and search term
+     * @return {Array} Filtered array of Account records
+     */
+    get filteredAccounts() {
+        if (!this.accounts || this.accounts.length === 0) {
+            return [];
+        }
+
+        return this.accounts.filter(account => {
+            // Filter by search term (account name)
+            if (this.searchTerm) {
+                const accountName = account.Name ? account.Name.toLowerCase() : '';
+                if (!accountName.includes(this.searchTerm)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    }
+
+    /**
+     * Getter to check if any filters are active
+     * @return {boolean} True if industry or search term is set
+     */
+    get hasActiveFilters() {
+        return this.selectedIndustry || this.searchTerm;
+    }
+
+    /**
+     * Getter to display active filter labels
+     * @return {string} Label describing active filters
+     */
+    get activeFiltersLabel() {
+        const filters = [];
+        if (this.selectedIndustry) {
+            filters.push(`Industry: ${this.selectedIndustry}`);
+        }
+        if (this.searchTerm) {
+            filters.push(`Search: "${this.searchTerm}"`);
+        }
+        return filters.join(' • ');
     }
 
     /**
@@ -267,5 +324,81 @@ export default class AccountList extends LightningElement {
             .finally(() => {
                 this.isUpdating = false;
             });
+    }
+
+    /**
+     * Getter to calculate paginated accounts for current page
+     * @return {Array} Array of accounts for the current page
+     */
+    get paginatedAccounts() {
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = startIndex + this.pageSize;
+        return this.filteredAccounts.slice(startIndex, endIndex);
+    }
+
+    /**
+     * Getter to calculate total number of pages
+     * @return {number} Total pages based on filtered accounts
+     */
+    get totalPages() {
+        return Math.ceil(this.filteredAccounts.length / this.pageSize) || 1;
+    }
+
+    /**
+     * Getter to check if pagination controls should be displayed
+     * @return {boolean} True if more than one page exists
+     */
+    get hasPagination() {
+        return this.totalPages > 1;
+    }
+
+    /**
+     * Getter to calculate the starting index for display
+     * @return {number} 1-based index of first account on current page
+     */
+    get pageStartIndex() {
+        return (this.currentPage - 1) * this.pageSize + 1;
+    }
+
+    /**
+     * Getter to calculate the ending index for display
+     * @return {number} 1-based index of last account on current page
+     */
+    get pageEndIndex() {
+        return Math.min(this.currentPage * this.pageSize, this.filteredAccounts.length);
+    }
+
+    /**
+     * Getter to determine if Previous button should be disabled
+     * @return {boolean} True if on first page
+     */
+    get isPreviousDisabled() {
+        return this.currentPage === 1;
+    }
+
+    /**
+     * Getter to determine if Next button should be disabled
+     * @return {boolean} True if on last page
+     */
+    get isNextDisabled() {
+        return this.currentPage === this.totalPages;
+    }
+
+    /**
+     * Handles previous page button click
+     */
+    handlePreviousPage() {
+        if (this.currentPage > 1) {
+            this.currentPage -= 1;
+        }
+    }
+
+    /**
+     * Handles next page button click
+     */
+    handleNextPage() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage += 1;
+        }
     }
 }
