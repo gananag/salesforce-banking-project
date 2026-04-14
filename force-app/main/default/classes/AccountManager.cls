@@ -91,4 +91,54 @@ public class AccountManager {
             throw new AuraHandledException('Error updating account: ' + e.getMessage());
         }
     }
+
+    /**
+     * @description Retrieves related contacts for a specific account
+     * Phase 3.1: Display related records functionality
+     * @param accountId The ID of the account
+     * @return List of Contact records related to the account
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<Contact> getRelatedContacts(Id accountId) {
+        if (accountId == null) {
+            throw new AuraHandledException('Account ID is required.');
+        }
+        
+        if (!Contact.sObjectType.getDescribe().isAccessible()) {
+            throw new AuraHandledException('You do not have permission to access Contact records.');
+        }
+        
+        return [
+            SELECT Id, FirstName, LastName, Email, Phone, Title
+            FROM Contact
+            WHERE AccountId = :accountId
+            ORDER BY LastName, FirstName
+            LIMIT 100
+        ];
+    }
+
+    /**
+     * @description Retrieves related opportunities for a specific account
+     * Phase 3.1: Display related records functionality
+     * @param accountId The ID of the account
+     * @return List of Opportunity records related to the account
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<Opportunity> getRelatedOpportunities(Id accountId) {
+        if (accountId == null) {
+            throw new AuraHandledException('Account ID is required.');
+        }
+        
+        if (!Opportunity.sObjectType.getDescribe().isAccessible()) {
+            throw new AuraHandledException('You do not have permission to access Opportunity records.');
+        }
+        
+        return [
+            SELECT Id, Name, Amount, StageName, CloseDate, Probability
+            FROM Opportunity
+            WHERE AccountId = :accountId
+            ORDER BY CloseDate DESC
+            LIMIT 100
+        ];
+    }
 }
