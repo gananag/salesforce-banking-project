@@ -157,8 +157,12 @@ public class UpdateAccountsBatchTest {
         Database.executeBatch(batch, 200);
         Test.stopTest();
 
-        // Verify success count increased
-        System.assertEquals(10, [SELECT COUNT() FROM Account WHERE Description LIKE '%Last batch updated:%'], 'All 10 accounts should have updated descriptions');
+        // Verify success count increased (Description is not filterable in SOQL; check in Apex)
+        Integer updatedCount = 0;
+        for (Account a : [SELECT Description FROM Account LIMIT 50]) {
+            if (a.Description != null && a.Description.contains('Last batch updated:')) updatedCount++;
+        }
+        System.assertEquals(10, updatedCount, 'All 10 accounts should have updated descriptions');
     }
 
     /**
@@ -239,8 +243,12 @@ public class UpdateAccountsBatchTest {
         Database.executeBatch(batch, 5);
         Test.stopTest();
 
-        // Verify state was maintained (success count should equal total records)
-        System.assertEquals(15, [SELECT COUNT() FROM Account WHERE Description LIKE '%Last batch updated:%'], 'All 15 accounts should have updated descriptions');
+        // Verify state was maintained (Description is not filterable in SOQL; check in Apex)
+        Integer updatedCount2 = 0;
+        for (Account a : [SELECT Description FROM Account LIMIT 50]) {
+            if (a.Description != null && a.Description.contains('Last batch updated:')) updatedCount2++;
+        }
+        System.assertEquals(15, updatedCount2, 'All 15 accounts should have updated descriptions');
     }
 
     /**

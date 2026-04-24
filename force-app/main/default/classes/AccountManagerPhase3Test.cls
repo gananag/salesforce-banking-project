@@ -75,7 +75,7 @@ public class AccountManagerPhase3Test {
         Test.startTest();
         try {
             AccountManager.getRelatedContacts(null);
-            System.fail('Should throw exception for null account ID');
+            System.assert(false, 'Should throw exception for null account ID');
         } catch (AuraHandledException e) {
             System.assert(e.getMessage().contains('Account ID is required'), 'Should return proper error message');
         }
@@ -90,7 +90,7 @@ public class AccountManagerPhase3Test {
         Test.startTest();
         try {
             AccountManager.getRelatedOpportunities(null);
-            System.fail('Should throw exception for null account ID');
+            System.assert(false, 'Should throw exception for null account ID');
         } catch (AuraHandledException e) {
             System.assert(e.getMessage().contains('Account ID is required'), 'Should return proper error message');
         }

@@ -61,9 +61,9 @@ public class AccountTriggerHandler {
         // Query existing accounts to check for duplicates
         if (!accountNames.isEmpty()) {
             List<Account> existingAccounts = [
-                SELECT Id, Name 
-                FROM Account 
-                WHERE LOWER(Name) IN :accountNames
+                SELECT Id, Name
+                FROM Account
+                WHERE Name IN :accountNames
                 LIMIT 1000
             ];
 
@@ -100,9 +100,9 @@ public class AccountTriggerHandler {
         // If names changed, check for duplicates
         if (!changedNames.isEmpty()) {
             List<Account> existingAccounts = [
-                SELECT Id, Name 
-                FROM Account 
-                WHERE LOWER(Name) IN :changedNames 
+                SELECT Id, Name
+                FROM Account
+                WHERE Name IN :changedNames
                 AND Id NOT IN :oldAccountsMap.keySet()
                 LIMIT 1000
             ];
