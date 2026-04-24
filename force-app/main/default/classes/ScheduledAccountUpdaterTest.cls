@@ -185,12 +185,11 @@ public class ScheduledAccountUpdaterTest {
         String jobId = System.schedule('Large Dataset Job', '0 0 2 * * ?', scheduler);
         Test.stopTest();
 
-        // Verify all accounts were processed
-        Integer updatedCount = [
-            SELECT COUNT()
-            FROM Account
-            WHERE Description LIKE '%Last batch updated:%'
-        ];
+        // Verify all accounts were processed (Description is not filterable in SOQL; check in Apex)
+        Integer updatedCount = 0;
+        for (Account a : [SELECT Description FROM Account LIMIT 300]) {
+            if (a.Description != null && a.Description.contains('Last batch updated:')) updatedCount++;
+        }
         System.assertEquals(250, updatedCount, 'All 250 accounts should be updated by batch');
     }
 

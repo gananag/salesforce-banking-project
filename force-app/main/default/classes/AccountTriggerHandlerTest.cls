@@ -150,13 +150,6 @@ public class AccountTriggerHandlerTest {
 
         String originalDescription = [SELECT Description FROM Account WHERE Id = :acc.Id].Description;
 
-        // Wait a moment to ensure timestamp difference
-        try {
-            Thread.sleep(100);
-        } catch (Exception e) {
-            // Thread.sleep may not be available in all test contexts
-        }
-
         Test.startTest();
         acc.Industry = 'Finance';
         update acc;
