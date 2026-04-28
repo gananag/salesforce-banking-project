@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(sf project:*)"
+      "Bash(sf project:*)",
+      "Bash(\"C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\" --headless=new --screenshot=\"PORTFOLIO.jpg\" --window-size=1400,5000 --hide-scrollbars --force-device-scale-factor=1.5 \"file:///c:/Users/ganan/OneDrive/Documents/salesforce-pd2-project/PORTFOLIO.html\")",
+      "Bash(echo \"Exit: $?\")"
     ]
   }
 }

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Salesforce PD2 Portfolio — Gananag Syannaneti</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  :root {
+    --bg:#050a14;--s1:#0d1626;--s2:#0f1c2e;--s3:#142236;
+    --border:#1e3352;--text:#e8f4fd;--muted:#7a9abf;
+    --blue:#4db8ff;--green:#2ddb7a;--orange:#ffb84d;
+    --purple:#c084fc;--teal:#34d4b0;--red:#ff6b7a;
+    --gold:#ffd700;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ─── animated grid background ─── */
+  body::before{
+    content:'';
+    position:fixed;inset:0;
+    background-image:
+      linear-gradient(rgba(77,184,255,.04) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(77,184,255,.04) 1px,transparent 1px);
+    background-size:40px 40px;
+    pointer-events:none;z-index:0;
+  }
+
+  .page{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:2rem 1.5rem 3rem;}
+
+  /* ─── HERO ─── */
+  .hero{
+    text-align:center;
+    padding:3rem 1rem 2.5rem;
+    position:relative;
+  }
+  .hero-glow{
+    position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:600px;height:300px;
+    background:radial-gradient(ellipse,rgba(77,184,255,.15) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .hero-label{
+    display:inline-block;
+    background:linear-gradient(135deg,#4db8ff22,#c084fc22);
+    border:1px solid #4db8ff44;
+    border-radius:999px;
+    padding:.3rem 1rem;
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin-bottom:1.25rem;
+  }
+  .hero h1{
+    font-size:2.8rem;
+    font-weight:900;
+    line-height:1.1;
+    background:linear-gradient(135deg,#4db8ff,#c084fc,#34d4b0);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    margin-bottom:.75rem;
+  }
+  .hero-sub{
+    font-size:1.1rem;
+    color:var(--muted);
+    max-width:600px;
+    margin:0 auto 1.5rem;
+    font-weight:400;
+    line-height:1.6;
+  }
+  .hero-pills{
+    display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;
+    margin-bottom:2rem;
+  }
+  .pill{
+    padding:.35rem .9rem;
+    border-radius:999px;
+    font-size:.78rem;
+    font-weight:600;
+    border:1px solid;
+  }
+  .pill-blue  {background:#4db8ff18;color:#4db8ff;border-color:#4db8ff44;}
+  .pill-green {background:#2ddb7a18;color:#2ddb7a;border-color:#2ddb7a44;}
+  .pill-purple{background:#c084fc18;color:#c084fc;border-color:#c084fc44;}
+  .pill-teal  {background:#34d4b018;color:#34d4b0;border-color:#34d4b044;}
+  .pill-orange{background:#ffb84d18;color:#ffb84d;border-color:#ffb84d44;}
+
+  /* ─── KPI strip ─── */
+  .kpi-strip{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:1rem;
+    margin-bottom:2.5rem;
+  }
+  .kpi{
+    background:var(--s1);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:1.2rem .8rem;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .kpi::after{
+    content:'';
+    position:absolute;bottom:0;left:0;right:0;height:3px;
+    border-radius:0 0 14px 14px;
+  }
+  .kpi.k1::after{background:var(--blue);}
+  .kpi.k2::after{background:var(--green);}
+  .kpi.k3::after{background:var(--purple);}
+  .kpi.k4::after{background:var(--teal);}
+  .kpi.k5::after{background:var(--orange);}
+  .kpi-num{
+    font-size:2.2rem;
+    font-weight:900;
+    line-height:1;
+    margin-bottom:.3rem;
+  }
+  .kpi.k1 .kpi-num{color:var(--blue);}
+  .kpi.k2 .kpi-num{color:var(--green);}
+  .kpi.k3 .kpi-num{color:var(--purple);}
+  .kpi.k4 .kpi-num{color:var(--teal);}
+  .kpi.k5 .kpi-num{color:var(--orange);}
+  .kpi-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
+
+  /* ─── Section title ─── */
+  .sec-title{
+    font-size:1.3rem;
+    font-weight:800;
+    margin-bottom:1rem;
+    display:flex;
+    align-items:center;
+    gap:.6rem;
+  }
+  .sec-title span{color:var(--muted);font-size:.85rem;font-weight:400;}
+
+  /* ─── Phase cards ─── */
+  .phases{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:1rem;
+    margin-bottom:2.5rem;
+  }
+  .phase-card{
+    background:var(--s1);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:1.1rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .phase-card::before{
+    content:'';
+    position:absolute;top:0;left:0;right:0;height:3px;
+    border-radius:14px 14px 0 0;
+  }
+  .ph1::before{background:var(--blue);}
+  .ph2::before{background:var(--green);}
+  .ph3::before{background:var(--orange);}
+  .ph4::before{background:var(--purple);}
+  .ph5::before{background:var(--teal);}
+
+  .phase-num{
+    font-size:.65rem;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-bottom:.4rem;
+  }
+  .ph1 .phase-num{color:var(--blue);}
+  .ph2 .phase-num{color:var(--green);}
+  .ph3 .phase-num{color:var(--orange);}
+  .ph4 .phase-num{color:var(--purple);}
+  .ph5 .phase-num{color:var(--teal);}
+
+  .phase-icon{font-size:1.6rem;margin-bottom:.5rem;display:block;}
+  .phase-name{font-size:.9rem;font-weight:700;margin-bottom:.5rem;line-height:1.3;}
+  .phase-list{list-style:none;}
+  .phase-list li{
+    font-size:.7rem;
+    color:var(--muted);
+    padding:.2rem 0;
+    border-bottom:1px solid #ffffff08;
+    display:flex;align-items:flex-start;gap:.35rem;
+  }
+  .phase-list li::before{content:'›';font-size:.85rem;flex-shrink:0;margin-top:-.05rem;}
+  .ph1 .phase-list li::before{color:var(--blue);}
+  .ph2 .phase-list li::before{color:var(--green);}
+  .ph3 .phase-list li::before{color:var(--orange);}
+  .ph4 .phase-list li::before{color:var(--purple);}
+  .ph5 .phase-list li::before{color:var(--teal);}
+
+  .done-tag{
+    display:inline-block;
+    margin-top:.6rem;
+    background:#2ddb7a18;
+    color:#2ddb7a;
+    border:1px solid #2ddb7a44;
+    border-radius:999px;
+    font-size:.6rem;
+    font-weight:700;
+    padding:.15rem .5rem;
+    letter-spacing:.5px;
+  }
+
+  /* ─── Skills grid ─── */
+  .two-col{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1.5rem;
+    margin-bottom:2.5rem;
+  }
+  .skills-box,.stack-box{
+    background:var(--s1);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:1.2rem;
+  }
+
+  .skill-row{
+    display:flex;align-items:center;gap:.75rem;
+    margin-bottom:.55rem;
+    font-size:.78rem;
+  }
+  .skill-name{width:10rem;color:var(--muted);white-space:nowrap;}
+  .skill-bar-bg{flex:1;height:7px;background:#ffffff0f;border-radius:4px;overflow:hidden;}
+  .skill-bar{height:100%;border-radius:4px;}
+  .skill-pct{width:2.5rem;text-align:right;font-weight:700;font-size:.72rem;}
+
+  .stack-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:.5rem;
+  }
+  .stack-item{
+    background:var(--s2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:.5rem .6rem;
+    font-size:.72rem;
+    display:flex;align-items:center;gap:.4rem;
+  }
+  .stack-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+  /* ─── Architecture flow ─── */
+  .flow-section{
+    background:var(--s1);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:1.5rem;
+    margin-bottom:2.5rem;
+  }
+  .flow-diagram{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+    overflow-x:auto;
+    padding:.5rem 0;
+  }
+  .flow-node{
+    background:var(--s2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:.8rem 1rem;
+    min-width:130px;
+    text-align:center;
+    flex-shrink:0;
+  }
+  .flow-node-icon{font-size:1.4rem;display:block;margin-bottom:.3rem;}
+  .flow-node-name{font-size:.75rem;font-weight:700;margin-bottom:.2rem;}
+  .flow-node-sub{font-size:.62rem;color:var(--muted);}
+  .flow-arrow{
+    display:flex;align-items:center;padding:0 .4rem;
+    color:var(--border);font-size:1.4rem;flex-shrink:0;
+  }
+
+  /* ─── API table ─── */
+  .api-section{
+    background:var(--s1);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:1.5rem;
+    margin-bottom:2.5rem;
+  }
+  .api-table{width:100%;border-collapse:collapse;font-size:.76rem;}
+  .api-table th{
+    text-align:left;padding:.5rem .75rem;
+    background:var(--s2);
+    color:var(--muted);
+    font-size:.65rem;
+    font-weight:700;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+    border-bottom:1px solid var(--border);
+  }
+  .api-table td{
+    padding:.55rem .75rem;
+    border-bottom:1px solid #ffffff06;
+    vertical-align:middle;
+  }
+  .method{
+    display:inline-block;
+    padding:.15rem .5rem;
+    border-radius:5px;
+    font-weight:700;
+    font-family:monospace;
+    font-size:.7rem;
+    min-width:3.5rem;
+    text-align:center;
+  }
+  .GET   {background:#34d4b018;color:#34d4b0;border:1px solid #34d4b044;}
+  .POST  {background:#4db8ff18;color:#4db8ff;border:1px solid #4db8ff44;}
+  .PATCH {background:#ffb84d18;color:#ffb84d;border:1px solid #ffb84d44;}
+  .DELETE{background:#ff6b7a18;color:#ff6b7a;border:1px solid #ff6b7a44;}
+  .ep-path{font-family:monospace;color:var(--muted);}
+  .ep-desc{color:var(--text);}
+  .ep-class{font-size:.65rem;color:var(--muted);}
+
+  /* ─── Coverage bars ─── */
+  .cov-section{
+    background:var(--s1);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:1.5rem;
+    margin-bottom:2.5rem;
+  }
+  .cov-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:.6rem 2rem;
+  }
+  .cov-row{display:flex;align-items:center;gap:.6rem;font-size:.74rem;}
+  .cov-label{width:12rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cov-bar-bg{flex:1;height:6px;background:#ffffff0f;border-radius:3px;overflow:hidden;}
+  .cov-bar-fill{height:100%;border-radius:3px;}
+  .cov-pct{width:2.5rem;text-align:right;font-weight:700;font-size:.7rem;}
+
+  /* ─── PD2 Concepts ─── */
+  .concepts{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1rem;
+    margin-bottom:2.5rem;
+  }
+  .concept-card{
+    background:var(--s1);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1rem;
+  }
+  .concept-icon{font-size:1.3rem;margin-bottom:.5rem;}
+  .concept-title{font-size:.8rem;font-weight:700;margin-bottom:.4rem;}
+  .concept-list{font-size:.68rem;color:var(--muted);line-height:1.8;}
+
+  /* ─── Footer ─── */
+  .footer{
+    text-align:center;
+    padding-top:1.5rem;
+    border-top:1px solid var(--border);
+    font-size:.75rem;
+    color:var(--muted);
+  }
+  .footer strong{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ HERO ══════════════════════════════════════════════════════ -->
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-label">Salesforce Platform Developer II</div>
+    <h1>Full-Stack Salesforce<br>Project Portfolio</h1>
+    <p class="hero-sub">
+      End-to-end Salesforce development covering LWC, Apex Triggers, Async Processing,
+      Security, REST APIs &amp; External Integrations — PD2 exam-ready.
+    </p>
+    <div class="hero-pills">
+      <span class="pill pill-blue">Lightning Web Components</span>
+      <span class="pill pill-green">Apex Triggers &amp; Batch</span>
+      <span class="pill pill-orange">SOQL Optimization</span>
+      <span class="pill pill-purple">Security &amp; FLS</span>
+      <span class="pill pill-teal">REST API &amp; Callouts</span>
+    </div>
+  </div>
+
+  <!-- ══ KPI STRIP ════════════════════════════════════════════════ -->
+  <div class="kpi-strip">
+    <div class="kpi k1"><div class="kpi-num">5</div><div class="kpi-label">Phases Complete</div></div>
+    <div class="kpi k2"><div class="kpi-num">18</div><div class="kpi-label">Apex Components</div></div>
+    <div class="kpi k3"><div class="kpi-num">51</div><div class="kpi-label">Tests Written</div></div>
+    <div class="kpi k4"><div class="kpi-num">100%</div><div class="kpi-label">Test Pass Rate</div></div>
+    <div class="kpi k5"><div class="kpi-num">99%</div><div class="kpi-label">Top Coverage</div></div>
+  </div>
+
+  <!-- ══ PHASES ════════════════════════════════════════════════════ -->
+  <div class="sec-title">📐 Project Phases <span>— all deployed to Salesforce org</span></div>
+  <div class="phases">
+
+    <div class="phase-card ph1">
+      <span class="phase-num">Phase 1</span>
+      <span class="phase-icon">⚡</span>
+      <div class="phase-name">LWC Account UI</div>
+      <ul class="phase-list">
+        <li>Create Account modal</li>
+        <li>Edit Revenue inline</li>
+        <li>Real-time Search/Filter</li>
+        <li>Paginated datatable (10/pg)</li>
+        <li>Industry filter badge</li>
+      </ul>
+      <span class="done-tag">✓ DEPLOYED</span>
+    </div>
+
+    <div class="phase-card ph2">
+      <span class="phase-num">Phase 2</span>
+      <span class="phase-icon">⚙️</span>
+      <div class="phase-name">Async Apex</div>
+      <ul class="phase-list">
+        <li>Trigger + Handler pattern</li>
+        <li>Duplicate name prevention</li>
+        <li>Auto-default Type field</li>
+        <li>Batchable (200 rec/chunk)</li>
+        <li>Schedulable with CRON</li>
+      </ul>
+      <span class="done-tag">✓ DEPLOYED</span>
+    </div>
+
+    <div class="phase-card ph3">
+      <span class="phase-num">Phase 3</span>
+      <span class="phase-icon">📊</span>
+      <div class="phase-name">Data Display</div>
+      <ul class="phase-list">
+        <li>Related Contacts panel</li>
+        <li>Related Opportunities</li>
+        <li>Dashboard statistics</li>
+        <li>Industry/Type charts</li>
+        <li>@AuraEnabled methods</li>
+      </ul>
+      <span class="done-tag">✓ DEPLOYED</span>
+    </div>
+
+    <div class="phase-card ph4">
+      <span class="phase-num">Phase 4</span>
+      <span class="phase-icon">🔒</span>
+      <div class="phase-name">Security &amp; Perf</div>
+      <ul class="phase-list">
+        <li>FLS/CRUD enforcement</li>
+        <li>SecurityUtility class</li>
+        <li>QueryOptimizationUtility</li>
+        <li>GovernorLimitMonitor</li>
+        <li>with sharing / SOQL indexes</li>
+      </ul>
+      <span class="done-tag">✓ DEPLOYED</span>
+    </div>
+
+    <div class="phase-card ph5">
+      <span class="phase-num">Phase 5</span>
+      <span class="phase-icon">🌐</span>
+      <div class="phase-name">REST API &amp; Integration</div>
+      <ul class="phase-list">
+        <li>@RestResource GET/POST/PATCH/DELETE</li>
+        <li>HTTP Callout (sync/fetch)</li>
+        <li>HttpCalloutMock testing</li>
+        <li>ResponseWrapper JSON</li>
+        <li>External CRM sync</li>
+      </ul>
+      <span class="done-tag">✓ DEPLOYED</span>
+    </div>
+
+  </div>
+
+  <!-- ══ ARCHITECTURE FLOW ═════════════════════════════════════════ -->
+  <div class="sec-title">🔁 End-to-End Architecture</div>
+  <div class="flow-section">
+    <div class="flow-diagram">
+      <div class="flow-node" style="border-color:#4db8ff55">
+        <span class="flow-node-icon">👤</span>
+        <div class="flow-node-name" style="color:#4db8ff">Salesforce User</div>
+        <div class="flow-node-sub">Browser / Mobile</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="border-color:#4db8ff55">
+        <span class="flow-node-icon">⚡</span>
+        <div class="flow-node-name" style="color:#4db8ff">LWC Component</div>
+        <div class="flow-node-sub">accountList.js/html</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="border-color:#2ddb7a55">
+        <span class="flow-node-icon">🧠</span>
+        <div class="flow-node-name" style="color:#2ddb7a">AccountManager</div>
+        <div class="flow-node-sub">@AuraEnabled Apex</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="border-color:#c084fc55">
+        <span class="flow-node-icon">🔒</span>
+        <div class="flow-node-name" style="color:#c084fc">SecurityUtility</div>
+        <div class="flow-node-sub">FLS / CRUD Check</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="border-color:#ffb84d55">
+        <span class="flow-node-icon">⚙️</span>
+        <div class="flow-node-name" style="color:#ffb84d">AccountTrigger</div>
+        <div class="flow-node-sub">Handler Pattern</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node" style="border-color:#2ddb7a55">
+        <span class="flow-node-icon">🗃️</span>
+        <div class="flow-node-name" style="color:#2ddb7a">Salesforce DB</div>
+        <div class="flow-node-sub">Account / Contact / Opp</div>
+      </div>
+      <div class="flow-arrow">↔</div>
+      <div class="flow-node" style="border-color:#34d4b055">
+        <span class="flow-node-icon">🌐</span>
+        <div class="flow-node-name" style="color:#34d4b0">REST API</div>
+        <div class="flow-node-sub">External Clients</div>
+      </div>
+      <div class="flow-arrow">↔</div>
+      <div class="flow-node" style="border-color:#34d4b055">
+        <span class="flow-node-icon">🔗</span>
+        <div class="flow-node-name" style="color:#34d4b0">External CRM</div>
+        <div class="flow-node-sub">HTTP Callouts</div>
+      </div>
+    </div>
+    <!-- Async row -->
+    <div style="display:flex;align-items:center;gap:.6rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
+      <span style="font-size:.7rem;color:var(--muted);white-space:nowrap;font-weight:600;text-transform:uppercase;letter-spacing:.8px;">Async Layer</span>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <div class="flow-node" style="min-width:0;padding:.5rem .75rem;border-color:#2ddb7a44">
+          <span style="font-size:.7rem;color:#2ddb7a;font-weight:700;">⏰ CronTrigger → ScheduledAccountUpdater → UpdateAccountsBatch (200/chunk)</span>
+        </div>
+        <div class="flow-node" style="min-width:0;padding:.5rem .75rem;border-color:#c084fc44">
+          <span style="font-size:.7rem;color:#c084fc;font-weight:700;">📈 GovernorLimitMonitor · QueryOptimizationUtility</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TWO-COL: Skills + Stack ═══════════════════════════════════ -->
+  <div class="two-col">
+    <div class="skills-box">
+      <div class="sec-title" style="font-size:1rem;margin-bottom:.9rem;">💡 Apex Skill Depth</div>
+      <div class="skill-row">
+        <span class="skill-name">Apex Triggers &amp; Handlers</span>
+        <div class="skill-bar-bg"><div class="skill-bar" style="width:98%;background:var(--green);"></div></div>
+        <span class="skill-pct" style="color:var(--green)">98%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Batch / Schedulable</span>
+        <div class="skill-bar-bg"><div class="skill-bar" style="width:96%;background:var(--green);"></div></div>
+        <span class="skill-pct" style="color:var(--green)">96%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">REST API (@RestResource)</span>
+        <div class="skill-bar-bg"><div class="skill-bar" style="width:92%;background:var(--blue);"></div></div>
+        <span class="skill-pct" style="color:var(--blue)">92%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">HTTP Callouts &amp; Mocks</span>
+        <div class="skill-bar-bg"><div class="skill-bar" style="width:94%;background:var(--teal);"></div></div>
+        <span class="skill-pct" style="color:var(--teal)">94%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Security (FLS/CRUD/Sharing)</span>
+        <div class="skill-bar-bg"><div class="skill-bar" style="width:90%;background:var(--purple);"></div></div>
+        <span class="skill-pct" style="color:var(--purple)">90%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">SOQL / Query Optimization</span>
+        <div class="skill-bar-bg"><div class="skill-bar" style="width:93%;background:var(--orange);"></div></div>
+        <span class="skill-pct" style="color:var(--orange)">93%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">LWC (JavaScript / HTML)</span>
+        <div class="skill-bar-bg"><div class="skill-bar" style="width:88%;background:var(--blue);"></div></div>
+        <span class="skill-pct" style="color:var(--blue)">88%</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-name">Apex Test Coverage</span>
+        <div class="skill-bar-bg"><div class="skill-bar" style="width:97%;background:var(--green);"></div></div>
+        <span class="skill-pct" style="color:var(--green)">97%</span>
+      </div>
+    </div>
+
+    <div class="stack-box">
+      <div class="sec-title" style="font-size:1rem;margin-bottom:.9rem;">🛠️ Technology Stack</div>
+      <div class="stack-grid">
+        <div class="stack-item"><div class="stack-dot" style="background:var(--blue)"></div>Apex</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--blue)"></div>LWC</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--blue)"></div>SOQL</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--green)"></div>Database.Batchable</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--green)"></div>Schedulable</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--green)"></div>Queueable</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--teal)"></div>@RestResource</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--teal)"></div>HttpCalloutMock</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--teal)"></div>RestContext</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--purple)"></div>with sharing</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--purple)"></div>Schema.SObjectType</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--purple)"></div>FLS/CRUD checks</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--orange)"></div>Salesforce CLI (sf)</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--orange)"></div>SFDX / Metadata API</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--orange)"></div>Git / GitHub</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--muted)"></div>JSON (de)serialize</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--muted)"></div>Governor Limits API</div>
+        <div class="stack-item"><div class="stack-dot" style="background:var(--muted)"></div>Test.setMock()</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REST API TABLE ════════════════════════════════════════════ -->
+  <div class="sec-title">🌐 REST API Endpoints — <span>urlMapping='/accounts/*'</span></div>
+  <div class="api-section">
+    <table class="api-table">
+      <thead>
+        <tr>
+          <th>Method</th><th>Endpoint</th><th>Description</th><th>Auth</th><th>Response</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="method GET">GET</span></td><td class="ep-path">/services/apexrest/accounts/</td><td class="ep-desc">List all accounts with Name, Industry, Type, Revenue</td><td style="color:var(--muted);font-size:.7rem;">Session ID</td><td style="color:var(--teal);font-size:.7rem;">200 JSON Array</td></tr>
+        <tr><td><span class="method GET">GET</span></td><td class="ep-path">/services/apexrest/accounts/{id}</td><td class="ep-desc">Get single account by 15/18-char Salesforce ID</td><td style="color:var(--muted);font-size:.7rem;">Session ID</td><td style="color:var(--teal);font-size:.7rem;">200 / 404</td></tr>
+        <tr><td><span class="method POST">POST</span></td><td class="ep-path">/services/apexrest/accounts/</td><td class="ep-desc">Create account — body: {name, industry, type}</td><td style="color:var(--muted);font-size:.7rem;">Session ID</td><td style="color:var(--blue);font-size:.7rem;">201 Created</td></tr>
+        <tr><td><span class="method PATCH">PATCH</span></td><td class="ep-path">/services/apexrest/accounts/{id}</td><td class="ep-desc">Update revenue / phone / website fields</td><td style="color:var(--muted);font-size:.7rem;">Session ID</td><td style="color:var(--orange);font-size:.7rem;">200 / 404</td></tr>
+        <tr><td><span class="method DELETE">DELETE</span></td><td class="ep-path">/services/apexrest/accounts/{id}</td><td class="ep-desc">Delete account by ID</td><td style="color:var(--muted);font-size:.7rem;">Session ID</td><td style="color:var(--red);font-size:.7rem;">200 / 404</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══ COVERAGE ══════════════════════════════════════════════════ -->
+  <div class="sec-title">🧪 Test Coverage <span>— 51 tests · 100% pass rate · min required 75%</span></div>
+  <div class="cov-section">
+    <div class="cov-grid">
+      <div class="cov-row"><span class="cov-label">ExternalSystemIntegration</span><div class="cov-bar-bg"><div class="cov-bar-fill" style="width:99%;background:var(--green);"></div></div><span class="cov-pct" style="color:var(--green)">99%</span></div>
+      <div class="cov-row"><span class="cov-label">AccountTriggerHandler</span><div class="cov-bar-bg"><div class="cov-bar-fill" style="width:97%;background:var(--green);"></div></div><span class="cov-pct" style="color:var(--green)">97%</span></div>
+      <div class="cov-row"><span class="cov-label">UpdateAccountsBatch</span><div class="cov-bar-bg"><div class="cov-bar-fill" style="width:95%;background:var(--green);"></div></div><span class="cov-pct" style="color:var(--green)">95%</span></div>
+      <div class="cov-row"><span class="cov-label">ScheduledAccountUpdater</span><div class="cov-bar-bg"><div class="cov-bar-fill" style="width:93%;background:var(--green);"></div></div><span class="cov-pct" style="color:var(--green)">93%</span></div>
+      <div class="cov-row"><span class="cov-label">SecurityUtility</span><div class="cov-bar-bg"><div class="cov-bar-fill" style="width:92%;background:var(--green);"></div></div><span class="cov-pct" style="color:var(--green)">92%</span></div>
+      <div class="cov-row"><span class="cov-label">GovernorLimitMonitor</span><div class="cov-bar-bg"><div class="cov-bar-fill" style="width:90%;background:var(--green);"></div></div><span class="cov-pct" style="color:var(--green)">90%</span></div>
+      <div class="cov-row"><span class="cov-label">AccountManager</span><div class="cov-bar-bg"><div class="cov-bar-fill" style="width:88%;background:var(--green);"></div></div><span class="cov-pct" style="color:var(--green)">88%</span></div>
+      <div class="cov-row"><span class="cov-label">AccountRestService</span><div class="cov-bar-bg"><div class="cov-bar-fill" style="width:84%;background:var(--green);"></div></div><span class="cov-pct" style="color:var(--green)">84%</span></div>
+    </div>
+  </div>
+
+  <!-- ══ PD2 CONCEPTS ══════════════════════════════════════════════ -->
+  <div class="sec-title">🎯 PD2 Exam Concepts Covered</div>
+  <div class="concepts">
+    <div class="concept-card">
+      <div class="concept-icon">🔄</div>
+      <div class="concept-title" style="color:var(--green)">Async Apex</div>
+      <div class="concept-list">
+        Database.Batchable&lt;SObject&gt;<br>
+        Database.Stateful<br>
+        Schedulable / CRON<br>
+        AsyncApexJob tracking<br>
+        start / execute / finish
+      </div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">⚙️</div>
+      <div class="concept-title" style="color:var(--orange)">Trigger Patterns</div>
+      <div class="concept-list">
+        Handler class pattern<br>
+        before / after events<br>
+        Trigger.new / oldMap<br>
+        addError() validation<br>
+        Bulk-safe logic
+      </div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🔒</div>
+      <div class="concept-title" style="color:var(--purple)">Security Model</div>
+      <div class="concept-list">
+        with sharing enforcement<br>
+        isAccessible / isUpdateable<br>
+        isCreateable / isDeletable<br>
+        Schema.SObjectField<br>
+        Limits.* monitoring
+      </div>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🌐</div>
+      <div class="concept-title" style="color:var(--teal)">Integration</div>
+      <div class="concept-list">
+        @RestResource / @HttpGet<br>
+        RestContext.request/response<br>
+        Http / HttpRequest callouts<br>
+        HttpCalloutMock testing<br>
+        JSON.serialize / deserialize
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FOOTER ════════════════════════════════════════════════════ -->
+  <div class="footer">
+    <strong>Gananag Syannaneti</strong> · Salesforce PD2 Project · 5 Phases · 18 Apex Classes · 51 Tests Passing · April 2026
+    <br><span style="font-size:.68rem;margin-top:.3rem;display:inline-block;">Org: gananag.syannaneti@brave-panda-ti0u6b.com · All Components Deployed · API v59.0</span>
+  </div>
+
+</div>
+</body>
+</html>
