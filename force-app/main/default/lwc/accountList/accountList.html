@@ -1,0 +1,194 @@
+<template>
+    <lightning-card title="Account List" icon-name="standard:account">
+        <div slot="actions">
+            <lightning-button
+                variant="brand"
+                label="Create Account"
+                icon-name="utility:add"
+                onclick={handleOpenCreateModal}
+                class="slds-m-left_small">
+            </lightning-button>
+        </div>
+
+        <div class="slds-m-around_medium">
+            <!-- Industry Filter -->
+            <lightning-combobox
+                name="industry"
+                label="Select Industry"
+                value={selectedIndustry}
+                options={industryOptions}
+                onchange={handleIndustryChange}
+                class="slds-m-bottom_medium">
+            </lightning-combobox>
+
+            <!-- Search Filter -->
+            <lightning-input
+                type="search"
+                name="searchTerm"
+                label="Search by Account Name"
+                value={searchTerm}
+                onchange={handleSearchChange}
+                placeholder="Enter account name..."
+                class="slds-m-bottom_medium">
+            </lightning-input>
+
+            <!-- Active Filters Display -->
+            <template if:true={hasActiveFilters}>
+                <div class="slds-m-bottom_medium">
+                    <lightning-badge label={activeFiltersLabel}></lightning-badge>
+                </div>
+            </template>
+
+            <template if:true={error}>
+                <lightning-alert variant="error" title="Error loading accounts">
+                    {errorMessage}
+                </lightning-alert>
+            </template>
+
+            <!-- Results Summary -->
+            <template if:false={error}>
+                <template if:true={filteredAccounts.length}>
+                    <div class="slds-m-bottom_medium">
+                        <small>Showing {pageStartIndex} - {pageEndIndex} of {filteredAccounts.length} account(s)</small>
+                    </div>
+                </template>
+
+                <lightning-datatable
+                    key-field="Id"
+                    data={paginatedAccounts}
+                    columns={columns}
+                    onrowaction={handleRowAction}>
+                </lightning-datatable>
+
+                <!-- Pagination Controls -->
+                <template if:true={hasPagination}>
+                    <div class="slds-m-top_medium slds-grid slds-grid_align-center">
+                        <lightning-button
+                            variant="neutral"
+                            label="Previous"
+                            icon-name="utility:left"
+                            onclick={handlePreviousPage}
+                            disabled={isPreviousDisabled}
+                            class="slds-m-right_x-small">
+                        </lightning-button>
+                        <span class="slds-align-middle slds-m-horizontal_small">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <lightning-button
+                            variant="neutral"
+                            label="Next"
+                            icon-name="utility:right"
+                            icon-position="right"
+                            onclick={handleNextPage}
+                            disabled={isNextDisabled}
+                            class="slds-m-left_x-small">
+                        </lightning-button>
+                    </div>
+                </template>
+
+                <!-- No Results Message -->
+                <template if:false={filteredAccounts.length}>
+                    <div class="slds-m-top_medium slds-text-align_center">
+                        <p class="slds-text-color_weak">
+                            <template if:true={selectedIndustry}>
+                                No accounts found for the selected filters.
+                            </template>
+                            <template if:false={selectedIndustry}>
+                                Select an industry to view accounts.
+                            </template>
+                        </p>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+
+    <!-- Create Account Modal -->
+    <lightning-modal
+        ref="createModal"
+        label="Create New Account"
+        size="small">
+        <div class="slds-m-around_medium">
+            <lightning-input
+                label="Account Name"
+                name="accountName"
+                value={createForm.accountName}
+                onchange={handleCreateFormChange}
+                class="slds-m-bottom_medium"
+                placeholder="Enter account name">
+            </lightning-input>
+
+            <lightning-combobox
+                label="Industry"
+                name="industry"
+                value={createForm.industry}
+                options={industryOptions}
+                onchange={handleCreateFormChange}
+                class="slds-m-bottom_medium">
+            </lightning-combobox>
+
+            <template if:true={createError}>
+                <lightning-alert
+                    variant="error"
+                    title="Error"
+                    class="slds-m-bottom_medium">
+                    {createError}
+                </lightning-alert>
+            </template>
+        </div>
+
+        <template slot="footer">
+            <lightning-button
+                variant="neutral"
+                label="Cancel"
+                onclick={handleCloseCreateModal}>
+            </lightning-button>
+            <lightning-button
+                variant="brand"
+                label="Create"
+                onclick={handleCreateAccount}
+                disabled={isCreating}>
+            </lightning-button>
+        </template>
+    </lightning-modal>
+
+    <!-- Revenue Update Modal -->
+    <lightning-modal
+        ref="revenueModal"
+        label="Update Revenue"
+        size="small">
+        <div class="slds-m-around_medium">
+            <lightning-input
+                label="Revenue"
+                name="revenue"
+                value={revenueForm.revenue}
+                onchange={handleRevenueFormChange}
+                class="slds-m-bottom_medium"
+                placeholder="Enter revenue">
+            </lightning-input>
+
+            <template if:true={revenueError}>
+                <lightning-alert
+                    variant="error"
+                    title="Error"
+                    class="slds-m-bottom_medium">
+                    {revenueError}
+                </lightning-alert>
+            </template>
+        </div>
+
+        <template slot="footer">
+            <lightning-button
+                variant="neutral"
+                label="Cancel"
+                onclick={handleCloseRevenueModal}>
+            </lightning-button>
+            <lightning-button
+                variant="brand"
+                label="Update"
+                onclick={handleUpdateRevenue}
+                disabled={isUpdating}>
+            </lightning-button>
+        </template>
+    </lightning-modal>
+</template>
