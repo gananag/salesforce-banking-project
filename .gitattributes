@@ -1,0 +1,15 @@
+# Tell GitHub Linguist to exclude HTML from the language breakdown
+# so Apex and JavaScript are shown as primary languages
+
+*.html linguist-documentation=true
+*.html linguist-detectable=false
+
+# Docs folder
+docs/* linguist-documentation=true
+
+# Salesforce XML metadata — not "code", don't count it
+*.xml linguist-documentation=true
+
+# JSON config files
+sfdx-project.json linguist-documentation=true
+package.json linguist-language=JSON
