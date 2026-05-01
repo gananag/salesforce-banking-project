@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Salesforce PD2 Project — Architecture</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --blue: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --purple: #bc8cff;
+      --red: #f85149;
+      --teal: #39d3b0;
+      --pink: #ff7b93;
+      --yellow: #e3b341;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #58a6ff, #bc8cff, #39d3b0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      color: var(--muted);
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+    .badge-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+    .badge-green  { background: #1a3a2a; color: var(--green);  border: 1px solid #2d6a4a; }
+    .badge-blue   { background: #162032; color: var(--blue);   border: 1px solid #1f4068; }
+    .badge-purple { background: #201a36; color: var(--purple); border: 1px solid #4a3080; }
+
+    /* ── Phase Legend ── */
+    .legend {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    /* ── Main Layout ── */
+    .arch {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      box-shadow: 0 0 0 1px rgba(88,166,255,0.3), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .card-icon {
+      font-size: 1.2rem;
+      width: 2rem;
+      text-align: center;
+    }
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .card-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+    .phase-tag {
+      margin-left: auto;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* Phase colors */
+    .p1 { border-top: 3px solid #58a6ff; }
+    .p1 .phase-tag { background: #162032; color: #58a6ff; }
+    .p1 .node-bar  { background: #58a6ff22; border-color: #58a6ff55; }
+    .p1 .node-dot  { background: #58a6ff; }
+
+    .p2 { border-top: 3px solid #3fb950; }
+    .p2 .phase-tag { background: #1a3a2a; color: #3fb950; }
+    .p2 .node-bar  { background: #3fb95022; border-color: #3fb95055; }
+    .p2 .node-dot  { background: #3fb950; }
+
+    .p3 { border-top: 3px solid #d29922; }
+    .p3 .phase-tag { background: #2e2000; color: #e3b341; }
+    .p3 .node-bar  { background: #d2992222; border-color: #d2992255; }
+    .p3 .node-dot  { background: #e3b341; }
+
+    .p4 { border-top: 3px solid #bc8cff; }
+    .p4 .phase-tag { background: #201a36; color: #bc8cff; }
+    .p4 .node-bar  { background: #bc8cff22; border-color: #bc8cff55; }
+    .p4 .node-dot  { background: #bc8cff; }
+
+    .p5 { border-top: 3px solid #39d3b0; }
+    .p5 .phase-tag { background: #0d2e26; color: #39d3b0; }
+    .p5 .node-bar  { background: #39d3b022; border-color: #39d3b055; }
+    .p5 .node-dot  { background: #39d3b0; }
+
+    /* ── Node items within cards ── */
+    .nodes { display: flex; flex-direction: column; gap: 0.4rem; }
+    .node-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      font-size: 0.78rem;
+    }
+    .node-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .node-name { font-weight: 600; color: var(--text); }
+    .node-type { font-size: 0.65rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
+
+    /* ── Middle column sections ── */
+    .middle-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ── Salesforce Org center box ── */
+    .org-box {
+      background: linear-gradient(135deg, #161b22, #1c2128);
+      border: 2px solid #30363d;
+      border-radius: 16px;
+      padding: 1.25rem;
+      text-align: center;
+      position: relative;
+    }
+    .org-box::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #58a6ff44, #bc8cff44, #39d3b044);
+      z-index: -1;
+    }
+    .org-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+    .org-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .org-url {
+      font-size: 0.7rem;
+      color: var(--blue);
+      margin-top: 0.2rem;
+      font-family: monospace;
+    }
+    .org-stats {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Flow arrows section ── */
+    .flow-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .flow-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem;
+    }
+    .flow-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      padding: 0.25rem 0;
+    }
+    .flow-step + .flow-step {
+      border-top: 1px solid var(--border);
+    }
+    .flow-arrow { color: var(--muted); flex-shrink: 0; }
+    .flow-badge {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-family: monospace;
+      color: var(--blue);
+      white-space: nowrap;
+    }
+
+    /* ── Test Coverage Bar ── */
+    .coverage-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .coverage-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .cov-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.45rem;
+      font-size: 0.73rem;
+    }
+    .cov-label { width: 11rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cov-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .cov-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 1s ease;
+    }
+    .cov-pct { width: 2.5rem; text-align: right; font-weight: 600; font-size: 0.7rem; }
+    .good  { background: var(--green); }
+    .ok    { background: var(--orange); }
+
+    /* ── Connection lines via SVG ── */
+    .diagram-wrapper {
+      position: relative;
+    }
+
+    /* ── Data Model ── */
+    .model-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .model-obj {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+    }
+    .model-obj-name {
+      font-weight: 600;
+      color: var(--blue);
+      margin-bottom: 0.25rem;
+    }
+    .model-field {
+      color: var(--muted);
+      font-size: 0.68rem;
+      line-height: 1.6;
+    }
+
+    /* ── Right col ── */
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ── Status pills ── */
+    .status-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.75rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.78rem;
+    }
+    .status-name { font-weight: 600; }
+    .status-pill {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+    }
+    .deployed { background: #1a3a2a; color: #3fb950; }
+    .pending  { background: #2e1a0a; color: #d29922; }
+
+    /* ── Separator ── */
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── API Endpoints ── */
+    .endpoint-list { display: flex; flex-direction: column; gap: 0.35rem; }
+    .endpoint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.6rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.72rem;
+    }
+    .method {
+      font-weight: 700;
+      font-family: monospace;
+      width: 3rem;
+      text-align: center;
+      padding: 0.1rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.65rem;
+    }
+    .GET    { background: #0d2e26; color: #39d3b0; }
+    .POST   { background: #162032; color: #58a6ff; }
+    .PATCH  { background: #2e2000; color: #e3b341; }
+    .DELETE { background: #2e1217; color: #f85149; }
+    .ep-path { font-family: monospace; color: var(--muted); }
+    .ep-desc { margin-left: auto; color: var(--muted); font-size: 0.65rem; }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      margin-top: 2.5rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1100px) {
+      .arch { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════ -->
+<div class="header">
+  <h1>Salesforce PD2 Project — System Architecture</h1>
+  <p>Platform Developer 2 Exam Prep · 5 Phases · 18 Apex Classes · 51 Tests</p>
+  <div class="badge-row">
+    <span class="badge badge-green">&#10003; All Phases Deployed</span>
+    <span class="badge badge-blue">51 / 51 Tests Passing</span>
+    <span class="badge badge-purple">18 Apex Components</span>
+  </div>
+</div>
+
+<!-- ══ LEGEND ══════════════════════════════════════════════════ -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div>Phase 1 — LWC UI</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div>Phase 2 — Async Apex</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e3b341"></div>Phase 3 — Data Display</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#bc8cff"></div>Phase 4 — Security &amp; Performance</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#39d3b0"></div>Phase 5 — REST API &amp; Integration</div>
+</div>
+
+<!-- ══ MAIN DIAGRAM ════════════════════════════════════════════ -->
+<div class="arch">
+
+  <!-- ─── LEFT COLUMN ─────────────────────────────────────── -->
+  <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+    <!-- Phase 1: LWC -->
+    <div class="card p1">
+      <div class="card-header">
+        <div class="card-icon">⚡</div>
+        <div>
+          <div class="card-title">Lightning Web Components</div>
+          <div class="card-sub">accountList — Frontend UI Layer</div>
+        </div>
+        <span class="phase-tag">Phase 1</span>
+      </div>
+      <div class="nodes">
+        <div class="node-bar p1">
+          <div class="node-dot p1"></div>
+          <span class="node-name">accountList.html</span>
+          <span class="node-type">Template</span>
+        </div>
+        <div class="node-bar p1">
+          <div class="node-dot p1"></div>
+          <span class="node-name">accountList.js</span>
+          <span class="node-type">Controller</span>
+        </div>
+      </div>
+      <div style="margin-top:0.75rem; padding-top:0.6rem; border-top:1px solid var(--border);">
+        <div class="section-label">UI Features</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.3rem;">
+          <span style="background:#162032;color:#58a6ff;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.68rem;">Create Modal</span>
+          <span style="background:#162032;color:#58a6ff;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.68rem;">Edit Revenue</span>
+          <span style="background:#162032;color:#58a6ff;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.68rem;">Search / Filter</span>
+          <span style="background:#162032;color:#58a6ff;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.68rem;">Pagination</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3: Related Records -->
+    <div class="card p3">
+      <div class="card-header">
+        <div class="card-icon">📊</div>
+        <div>
+          <div class="card-title">AccountManager (Phase 3)</div>
+          <div class="card-sub">Related Records + Dashboard</div>
+        </div>
+        <span class="phase-tag">Phase 3</span>
+      </div>
+      <div class="nodes">
+        <div class="node-bar p3">
+          <div class="node-dot p3"></div>
+          <span class="node-name">getRelatedContacts()</span>
+          <span class="node-type">@AuraEnabled</span>
+        </div>
+        <div class="node-bar p3">
+          <div class="node-dot p3"></div>
+          <span class="node-name">getRelatedOpportunities()</span>
+          <span class="node-type">@AuraEnabled</span>
+        </div>
+        <div class="node-bar p3">
+          <div class="node-dot p3"></div>
+          <span class="node-name">getDashboardStats()</span>
+          <span class="node-type">@AuraEnabled</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2: Trigger -->
+    <div class="card p2">
+      <div class="card-header">
+        <div class="card-icon">⚙️</div>
+        <div>
+          <div class="card-title">Trigger + Handler Pattern</div>
+          <div class="card-sub">AccountTrigger + AccountTriggerHandler</div>
+        </div>
+        <span class="phase-tag">Phase 2</span>
+      </div>
+      <div class="nodes">
+        <div class="node-bar p2">
+          <div class="node-dot p2"></div>
+          <span class="node-name">handleBeforeInsert()</span>
+          <span class="node-type">Validate + Default</span>
+        </div>
+        <div class="node-bar p2">
+          <div class="node-dot p2"></div>
+          <span class="node-name">handleBeforeUpdate()</span>
+          <span class="node-type">Duplicate Check</span>
+        </div>
+        <div class="node-bar p2">
+          <div class="node-dot p2"></div>
+          <span class="node-name">handleAfterInsert/Update()</span>
+          <span class="node-type">Metadata Update</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /left col -->
+
+  <!-- ─── MIDDLE COLUMN ────────────────────────────────────── -->
+  <div class="middle-col">
+
+    <!-- Salesforce Org Box -->
+    <div class="org-box">
+      <div class="org-label">Salesforce Org</div>
+      <div class="org-name">☁️ gananag.syannaneti@brave-panda-ti0u6b.com</div>
+      <div class="org-url">api/59.0 · Developer Edition</div>
+      <div class="org-stats">
+        <div class="stat">
+          <div class="stat-num" style="color:#3fb950">18</div>
+          <div class="stat-label">Components</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" style="color:#58a6ff">51</div>
+          <div class="stat-label">Tests</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" style="color:#bc8cff">5</div>
+          <div class="stat-label">Phases</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" style="color:#39d3b0">100%</div>
+          <div class="stat-label">Pass Rate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Model -->
+    <div class="coverage-section">
+      <div class="coverage-title">🗃️ Salesforce Data Model</div>
+      <div class="model-row">
+        <div class="model-obj">
+          <div class="model-obj-name">Account</div>
+          <div class="model-field">Name · Industry · Type<br>AnnualRevenue · Description<br>BillingCity · Phone · Website</div>
+        </div>
+        <div class="model-obj">
+          <div class="model-obj-name">Contact</div>
+          <div class="model-field">FirstName · LastName<br>Email · Phone<br>AccountId (FK)</div>
+        </div>
+        <div class="model-obj">
+          <div class="model-obj-name">Opportunity</div>
+          <div class="model-field">Name · Amount<br>StageName · CloseDate<br>AccountId (FK)</div>
+        </div>
+        <div class="model-obj">
+          <div class="model-obj-name">AsyncApexJob</div>
+          <div class="model-field">Status · TotalJobItems<br>JobItemsProcessed<br>NumberOfErrors</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Request Flows -->
+    <div class="flow-row">
+      <div class="flow-card">
+        <div class="flow-title">⚡ LWC → Apex Flow</div>
+        <div class="flow-step">
+          <span style="color:#58a6ff">LWC</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-badge">@wire / imperative</span>
+        </div>
+        <div class="flow-step">
+          <span style="color:#e3b341">AccountManager</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-badge">SOQL</span>
+        </div>
+        <div class="flow-step">
+          <span style="color:#3fb950">Account SObject</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-badge">JSON</span>
+        </div>
+        <div class="flow-step">
+          <span style="color:#58a6ff">UI Render</span>
+        </div>
+      </div>
+      <div class="flow-card">
+        <div class="flow-title">🌐 REST API Flow</div>
+        <div class="flow-step">
+          <span style="color:#39d3b0">External Client</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-badge">HTTPS</span>
+        </div>
+        <div class="flow-step">
+          <span style="color:#39d3b0">AccountRestService</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-badge">RestContext</span>
+        </div>
+        <div class="flow-step">
+          <span style="color:#3fb950">DML / SOQL</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-badge">JSON</span>
+        </div>
+        <div class="flow-step">
+          <span style="color:#39d3b0">responseBody</span>
+        </div>
+      </div>
+      <div class="flow-card">
+        <div class="flow-title">⏰ Batch/Schedule Flow</div>
+        <div class="flow-step">
+          <span style="color:#e3b341">CronTrigger</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-badge">CRON</span>
+        </div>
+        <div class="flow-step">
+          <span style="color:#e3b341">ScheduledAccountUpdater</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-badge">execute()</span>
+        </div>
+        <div class="flow-step">
+          <span style="color:#3fb950">UpdateAccountsBatch</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-badge">Database.Batchable</span>
+        </div>
+        <div class="flow-step">
+          <span style="color:#3fb950">200 recs/batch</span>
+        </div>
+      </div>
+      <div class="flow-card">
+        <div class="flow-title">🔗 Callout Flow</div>
+        <div class="flow-step">
+          <span style="color:#39d3b0">ExternalSystemIntegration</span>
+        </div>
+        <div class="flow-step">
+          <span class="flow-arrow">→</span>
+          <span class="flow-badge">HttpRequest</span>
+          <span style="color:#e3b341">External CRM</span>
+        </div>
+        <div class="flow-step">
+          <span class="flow-arrow">←</span>
+          <span class="flow-badge">HttpResponse</span>
+          <span style="color:#3fb950">JSON</span>
+        </div>
+        <div class="flow-step">
+          <span style="color:#39d3b0">CalloutResult</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Coverage -->
+    <div class="coverage-section">
+      <div class="coverage-title">🧪 Test Coverage</div>
+      <div class="cov-row"><span class="cov-label">ExternalSystemIntegration</span><div class="cov-bar-bg"><div class="cov-bar-fill good" style="width:99%"></div></div><span class="cov-pct" style="color:#3fb950">99%</span></div>
+      <div class="cov-row"><span class="cov-label">AccountTriggerHandler</span><div class="cov-bar-bg"><div class="cov-bar-fill good" style="width:97%"></div></div><span class="cov-pct" style="color:#3fb950">97%</span></div>
+      <div class="cov-row"><span class="cov-label">UpdateAccountsBatch</span><div class="cov-bar-bg"><div class="cov-bar-fill good" style="width:95%"></div></div><span class="cov-pct" style="color:#3fb950">95%</span></div>
+      <div class="cov-row"><span class="cov-label">ScheduledAccountUpdater</span><div class="cov-bar-bg"><div class="cov-bar-fill good" style="width:93%"></div></div><span class="cov-pct" style="color:#3fb950">93%</span></div>
+      <div class="cov-row"><span class="cov-label">SecurityUtility</span><div class="cov-bar-bg"><div class="cov-bar-fill good" style="width:92%"></div></div><span class="cov-pct" style="color:#3fb950">92%</span></div>
+      <div class="cov-row"><span class="cov-label">GovernorLimitMonitor</span><div class="cov-bar-bg"><div class="cov-bar-fill good" style="width:90%"></div></div><span class="cov-pct" style="color:#3fb950">90%</span></div>
+      <div class="cov-row"><span class="cov-label">AccountManager</span><div class="cov-bar-bg"><div class="cov-bar-fill good" style="width:88%"></div></div><span class="cov-pct" style="color:#3fb950">88%</span></div>
+      <div class="cov-row"><span class="cov-label">AccountRestService</span><div class="cov-bar-bg"><div class="cov-bar-fill good" style="width:84%"></div></div><span class="cov-pct" style="color:#3fb950">84%</span></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:0.4rem;">
+        <span style="font-size:0.7rem;color:var(--muted)">Min required: 75% · All classes pass ✓</span>
+      </div>
+    </div>
+
+  </div><!-- /middle col -->
+
+  <!-- ─── RIGHT COLUMN ─────────────────────────────────────── -->
+  <div class="right-col">
+
+    <!-- Phase 4: Security -->
+    <div class="card p4">
+      <div class="card-header">
+        <div class="card-icon">🔒</div>
+        <div>
+          <div class="card-title">Security &amp; Performance</div>
+          <div class="card-sub">CRUD/FLS · Limits · Optimization</div>
+        </div>
+        <span class="phase-tag">Phase 4</span>
+      </div>
+      <div class="nodes">
+        <div class="node-bar p4">
+          <div class="node-dot p4"></div>
+          <span class="node-name">SecurityUtility</span>
+          <span class="node-type">FLS / CRUD</span>
+        </div>
+        <div class="node-bar p4">
+          <div class="node-dot p4"></div>
+          <span class="node-name">QueryOptimizationUtility</span>
+          <span class="node-type">SOQL</span>
+        </div>
+        <div class="node-bar p4">
+          <div class="node-dot p4"></div>
+          <span class="node-name">GovernorLimitMonitor</span>
+          <span class="node-type">Limits API</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 5: REST -->
+    <div class="card p5">
+      <div class="card-header">
+        <div class="card-icon">🌐</div>
+        <div>
+          <div class="card-title">REST API &amp; Integration</div>
+          <div class="card-sub">@RestResource · HTTP Callouts</div>
+        </div>
+        <span class="phase-tag">Phase 5</span>
+      </div>
+      <div class="section-label" style="margin-bottom:0.4rem;">AccountRestService</div>
+      <div class="endpoint-list" style="margin-bottom:0.75rem;">
+        <div class="endpoint"><span class="method GET">GET</span><span class="ep-path">/accounts/</span><span class="ep-desc">List all</span></div>
+        <div class="endpoint"><span class="method GET">GET</span><span class="ep-path">/accounts/{id}</span><span class="ep-desc">Get one</span></div>
+        <div class="endpoint"><span class="method POST">POST</span><span class="ep-path">/accounts/</span><span class="ep-desc">Create</span></div>
+        <div class="endpoint"><span class="method PATCH">PATCH</span><span class="ep-path">/accounts/{id}</span><span class="ep-desc">Update</span></div>
+        <div class="endpoint"><span class="method DELETE">DELETE</span><span class="ep-path">/accounts/{id}</span><span class="ep-desc">Delete</span></div>
+      </div>
+      <div class="section-label" style="margin-bottom:0.4rem;">ExternalSystemIntegration</div>
+      <div class="nodes">
+        <div class="node-bar p5">
+          <div class="node-dot p5"></div>
+          <span class="node-name">syncAccountToExternal()</span>
+          <span class="node-type">POST</span>
+        </div>
+        <div class="node-bar p5">
+          <div class="node-dot p5"></div>
+          <span class="node-name">fetchExternalAccounts()</span>
+          <span class="node-type">GET</span>
+        </div>
+        <div class="node-bar p5">
+          <div class="node-dot p5"></div>
+          <span class="node-name">updateExternalAccount()</span>
+          <span class="node-type">PUT</span>
+        </div>
+        <div class="node-bar p5">
+          <div class="node-dot p5"></div>
+          <span class="node-name">deleteExternalAccount()</span>
+          <span class="node-type">DELETE</span>
+        </div>
+        <div class="node-bar p5">
+          <div class="node-dot p5"></div>
+          <span class="node-name">isExternalSystemAvailable()</span>
+          <span class="node-type">Health</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2: Batch/Schedule -->
+    <div class="card p2">
+      <div class="card-header">
+        <div class="card-icon">⏰</div>
+        <div>
+          <div class="card-title">Async Apex</div>
+          <div class="card-sub">Batch · Schedulable · Stateful</div>
+        </div>
+        <span class="phase-tag">Phase 2</span>
+      </div>
+      <div class="nodes">
+        <div class="node-bar p2">
+          <div class="node-dot p2"></div>
+          <span class="node-name">UpdateAccountsBatch</span>
+          <span class="node-type">Batchable</span>
+        </div>
+        <div class="node-bar p2">
+          <div class="node-dot p2"></div>
+          <span class="node-name">ScheduledAccountUpdater</span>
+          <span class="node-type">Schedulable</span>
+        </div>
+      </div>
+      <div style="margin-top:0.6rem;padding-top:0.5rem;border-top:1px solid var(--border);">
+        <div class="section-label">Scheduling Helpers</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.3rem;">
+          <span style="background:#1a3a2a;color:#3fb950;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.68rem;font-family:monospace">getDailySchedule(h,m)</span>
+          <span style="background:#1a3a2a;color:#3fb950;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.68rem;font-family:monospace">getHourlySchedule(m)</span>
+          <span style="background:#1a3a2a;color:#3fb950;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.68rem;font-family:monospace">getWeeklySchedule(d,h,m)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deployment Status -->
+    <div class="card" style="border-top:3px solid #3fb950;">
+      <div class="card-header">
+        <div class="card-icon">🚀</div>
+        <div>
+          <div class="card-title">Deployment Status</div>
+          <div class="card-sub">sf project deploy start</div>
+        </div>
+      </div>
+      <div class="status-grid">
+        <div class="status-row"><span class="status-name">Phase 1 — LWC UI</span><span class="status-pill deployed">Deployed</span></div>
+        <div class="status-row"><span class="status-name">Phase 2 — Async Apex</span><span class="status-pill deployed">Deployed</span></div>
+        <div class="status-row"><span class="status-name">Phase 3 — Data Display</span><span class="status-pill deployed">Deployed</span></div>
+        <div class="status-row"><span class="status-name">Phase 4 — Security</span><span class="status-pill deployed">Deployed</span></div>
+        <div class="status-row"><span class="status-name">Phase 5 — REST API</span><span class="status-pill deployed">Deployed</span></div>
+      </div>
+    </div>
+
+  </div><!-- /right col -->
+
+</div><!-- /arch -->
+
+<!-- ══ FOOTER ════════════════════════════════════════════════ -->
+<div class="footer">
+  Salesforce PD2 Project · All 5 Phases Complete · Generated 2026-04-24
+</div>
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+# Salesforce DX
+.sfdx/
+.sf/
+.salesforcedx/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+
+# Claude Code (local IDE settings — not project code)
+.claude/
